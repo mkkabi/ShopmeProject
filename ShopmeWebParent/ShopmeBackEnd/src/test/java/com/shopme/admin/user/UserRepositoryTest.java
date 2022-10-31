@@ -111,6 +111,14 @@ public class UserRepositoryTest {
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
+    }
 
+    @Test
+    public void testGetUserByEmail(){
+        String email = "abc@def.com";
+        User user = userRepository.getUserByEmail(email);
+        assertThat(user).isNull();
+        User user2 = userRepository.getUserByEmail("user1@gmail.com");
+        assertThat(user2).isNotNull();
     }
 }

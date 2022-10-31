@@ -10,7 +10,7 @@
 <h2> Manage Users | Create new User</h2> 
 </div>
 
-	<form th:action="@{/users/save}" method="post" style="max-width: 700px; margin:0 auto;" th:object="${user}">
+	<form th:action="@{/users/save}" method="post" style="max-width: 700px; margin:0 auto;" th:object="${user}"  th:onsubmit="return checkEmailUnique(this)">
 		<div class="border border-secondary rounded p-3">
 			<div class="form-group row mt-2">
 				<label class="col-sm-4 col-form-label">E-mail: </label>
@@ -61,6 +61,25 @@
 			</div>
 		</div>
 	</form>
+
+	<div class="modal fade text-center" id="modalDialog" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalTitle">Warning</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+				</div>
+				<div class="modal-body">
+					<span id="modalBody"></span>
+				</div>
+				<div class="modal-footer">
+ 					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<div th:replace="common.html :: footer"></div>
 </div>
@@ -72,6 +91,32 @@
 			window.location = "[[@{/users}]]";
 		});
 	});
+
+	function checkEmailUnique(form) {
+		url="[[@{/users/check_email}]]";
+		userEmail = $("#email").val();
+		csrfValue = $("input[name='_csrf']").val();
+		params = {email: userEmail, _csrf: csrfValue};
+
+		$.post(url, params, function(response){
+			if(response=="OK"){
+				form.submit();
+			}else if(response=="Duplicated"){
+				showModalDialog("Warning", "There is another user having the email "+userEmail);
+			}else{
+				showModalDialog("Error", "Unknown response from server");
+			}
+		}).fail(function(){
+			showModalDialog("Error", "Could not connect to server");
+		});
+		return false;
+	}
+
+	function showModalDialog(title, message){
+		$("#modalTitle").text(title);
+		$("#modalBody").text(message);
+		$("#modalDialog").modal('show');
+	}
 </script>
 
 </html>
