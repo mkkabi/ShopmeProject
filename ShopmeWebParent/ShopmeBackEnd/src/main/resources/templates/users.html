@@ -36,7 +36,10 @@
 					<td th:text="${user.lastName}"> </td>
 					<td th:text="${user.roles}"> </td>
 					<td th:text="${user.enabled}"> </td>
-					<td>Edit &nbsp; Delete</td>
+					<td>
+						<a class="fas fa-edit fa2x icon-green" th:href="@{'/users/edit/'+${user.id}}"
+						   title="Edit user"> Edit</a>
+						&nbsp; Delete</td>
 				</tr>
 			</tbody>
 		</table>
