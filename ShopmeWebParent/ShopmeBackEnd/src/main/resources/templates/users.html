@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common.html :: header"></head>
+
+<body>
+<div class="container-fluid">
+	<div th:replace="common.html :: navbar"></div>
+
+	<div>
+		 <h2>Manage Users</h2>
+		<a th:href="@{/users/new}">Create new User</a>
+	</div>
+	
+	<div class="alert alert-success text-center" th:if="${message != null}">[[${message}]]</div>
+
+	<div>
+		<table class="table table-bordered table-striped table-responsive-xl table-hover">
+			<thead class="thead-dark">
+				<tr>
+					<th>User ID</th>
+					<th>Photos</th>
+					<th>email</th>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th>Roles</th>
+					<th>Enabled</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr th:each="user:${users}">
+					<td th:text="${user.id}"> </td>
+					<td th:text="${user.photos}"> </td>
+					<td th:text="${user.email}"> </td>
+					<td th:text="${user.firstName}"> </td>
+					<td th:text="${user.lastName}"> </td>
+					<td th:text="${user.roles}"> </td>
+					<td th:text="${user.enabled}"> </td>
+					<td>Edit &nbsp; Delete</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div th:replace="common.html :: footer"></div>
+</div>
+</body>
+</html>
