@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Header Start -->
 <head th:fragment="header">
 <meta http-equiv="Content Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 <title th:text="${title}">Title</title>
 
 <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}" />
 <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 </head>
+<!-- Header End -->
 
 <body>
-
 <div class="container-fluid">
+
+	<!-- Navbar Start -->
 <div th:fragment="navbar">
 	<nav class="navbar navbar-expand bg-dark navbar-dark">
 		<a class="navbar-brand" th:href="@{/static}">
@@ -45,6 +51,37 @@
 </div>
 	<div>
 		<h2> Shopme control panel</h2>
+	</div>
+
+	<head th:fragment="common_header(title,links)">
+
+		<title th:replace="${title}">The awesome application</title>
+
+		<!-- Common styles and scripts -->
+		<link rel="stylesheet" type="text/css" media="all" th:href="@{/css/awesomeapp.css}">
+		<link rel="shortcut icon" th:href="@{/images/favicon.ico}">
+		<script type="text/javascript" th:src="@{/sh/scripts/codebase.js}"></script>
+
+		<!--/* Per-page placeholder for additional links */-->
+		<th:block th:replace="${links}" />
+
+	</head>
+
+	<div th:fragment="modalDialog(title,modalBody,buttons)" class="modal fade text-center" id="modalDialog" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 th:replace="${title}" class="modal-title" id="modalTitle" >Warning</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<span th:replace="${modalBody}" id="modalBody"></span>
+				</div>
+				<div class="modal-footer">
+					<button th:replace="${buttons}"></button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div class="text-center" th:fragment="footer">
