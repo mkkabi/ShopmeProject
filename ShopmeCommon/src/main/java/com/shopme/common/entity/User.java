@@ -116,4 +116,11 @@ public class User {
     public void addRole(Role role){
         this.roles.add(role);
     }
+
+    @Transient
+    public String getPhotosImagePath(){
+        if(id==null || photos == null)return "/images/default-image.png";
+        return "/user-photos/"+this.id+"/"+this.photos;
+    }
+
 }

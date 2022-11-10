@@ -1,61 +1,104 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="common.html :: header"></head>
+<head th:replace="fragments/common.html :: header"></head>
 
 <body>
 <div class="container-fluid">
-	<div th:replace="common.html :: navbar"></div>
+	<div th:replace="fragments/common.html :: navbar"></div>
 
 	<div>
-		 <h2>Manage Users</h2>
-		<a th:href="@{/users/new}">Create new User</a>
+		<h2>Manage Users</h2>
+		<a th:href="@{/users/new}">Create new User</a>&nbsp;|&nbsp;
+		<a th:href="@{/users/export/csv}">Export to CSV</a>
 	</div>
-	
+
 	<div class="alert alert-success text-center" th:if="${message != null}">[[${message}]]</div>
+
+	<div >
+		<form th:action="@{/users/page/1}" class="form-inline m-3">
+			<div class="form-group col-sm-5 row">
+				<input th:value="${sortField}" type="hidden"r name="sortField" />
+				<input th:value="${sortDir}" type="hidden" name="sortDir" />
+				<input type="search" name="keyword" class="form-control m-3 col-sm-2 " placeholder="enter search keyword" required />&nbsp;&nbsp;
+				<input type="submit" value="Search" class="btn btn-primary col-sm-2 " />&nbsp;&nbsp;
+				<input type="button" value="Clear" class="btn btn-secondary col-sm-2 " onclick="clearFilter()">
+			</div>
+		</form>
+	</div>
+
 
 	<div>
 		<table class="table table-bordered table-striped table-responsive-xl table-hover">
-			<thead class="thead-dark">
-				<tr>
-					<th>User ID</th>
-					<th>Photos</th>
-					<th>email</th>
-					<th>First Name</th>
-					<th>Last Name</th>
-					<th>Roles</th>
-					<th>Enabled</th>
-				</tr>
+			<thead class="text-bg-dark">
+			<tr>
+				<th th:replace="fragments/users_fragments.html :: column_link('id', 'ID')">
+				<th>Photos</th>
+				<th th:replace="fragments/users_fragments.html :: column_link('email', 'Email')">
+				<th th:replace="fragments/users_fragments.html :: column_link('firstName', 'First Name')">
+				<th th:replace="fragments/users_fragments.html :: column_link('lastName', 'Last Name')">
+				<th>Roles</th>
+				<th>Enabled</th>
+				<th>Edit/Delete</th>
+			</tr>
 			</thead>
 
 			<tbody>
-				<tr th:each="user:${users}">
-					<td th:text="${user.id}"> </td>
-					<td><span class="fas fa-portrait fa-2x icon-dark"></span> </td>
-					<td th:text="${user.email}"> </td>
-					<td th:text="${user.firstName}"> </td>
-					<td th:text="${user.lastName}"> </td>
-					<td th:text="${user.roles}"> </td>
-					<td>
-						<a th:if="${user.enabled == true}" th:href="@{'/users/'+${user.id}+'/enabled/false'}" class="fas fa-check-circle fa-2x icon-green" title="Disable User"></a>
-						<a th:if="${user.enabled == false}" th:href="@{'/users/'+${user.id}+'/enabled/true'}" class="fas fa-circle fa-2x icon-dark " title="Enable User"></a>
-					</td>
-					<td>
-						<a th:href="@{'/users/edit/'+${user.id}}" class="fas fa-edit fa-2x icon-green" title="Edit user"></a>
-						<a th:href="@{'/users/delete/'+${user.id}}" th:userId="${user.id}" class="fas fa-trash fa-2x icon-dark link-delete" title="Delete user"></a>
-					</td>
-				</tr>
+			<tr th:each="user:${users}">
+				<td th:text="${user.id}"> </td>
+				<td>
+					<span th:if="${user.photos==null}" class="fas fa-portrait fa-2x icon-dark"></span>
+					<img th:if="${user.photos!=null}" th:src="@{${user.photosImagePath}}" class="col-sm-2"/>
+				</td>
+				<td th:text="${user.email}"> </td>
+				<td th:text="${user.firstName}"> </td>
+				<td th:text="${user.lastName}"> </td>
+				<td th:text="${user.roles}"> </td>
+				<td>
+					<a th:if="${user.enabled == true}" th:href="@{'/users/'+${user.id}+'/enabled/false'}" class="fas fa-check-circle fa-2x icon-green" title="Disable User"></a>
+					<a th:if="${user.enabled == false}" th:href="@{'/users/'+${user.id}+'/enabled/true'}" class="fas fa-circle fa-2x icon-dark " title="Enable User"></a>
+				</td>
+				<td>
+
+					<a th:href="@{'/users/edit/'+${user.id}}" class="fas fa-edit fa-2x icon-green" title="Edit user"></a>
+					<a th:href="@{'/users/delete/'+${user.id}}" th:userId="${user.id}" class="fas fa-trash fa-2x icon-dark link-delete" title="Delete user"></a>
+				</td>
+			</tr>
 			</tbody>
 		</table>
 	</div>
 
-	<div th:replace="common.html :: modalDialog(~{::h5},~{::#modalBody},~{::.btn})" >
+	<div class="text-center" th:if="${totalElements > 0}">
+		<span>Showing users # [[${startCount}]] to [[${endCount}]] of [[${totalElements}]]</span>
+	</div>
+
+	<div class="text-center" th:unless="${totalElements > 0}">
+		<span>No users found</span>
+	</div>
+
+	<div th:if="${totalPages>1}" class="">
+		<nav>
+			<ul class="pagination justify-content-center">
+				<li class="page-item"><a class="page-link" th:href="@{'/users/page/1?'+'sortField='+${sortField}+'&sortDir='+${sortDir}}">First</a></li>
+				<li th:class="${currentPage>1?'page-item':'page-item disabled'}"><a class="page-link" th:href="@{'/users/page/'+${currentPage-1}+'?sortField='+${sortField}+'&sortDir='+${sortDir}}">Previous</a></li>
+
+				<li th:class="${currentPage!=i?'page-item':'page-item active'}" th:each="i : ${#numbers.sequence(1, totalPages)}">
+					<a class="page-link" th:href="@{'/users/page/'+${i}+'?sortField='+${sortField}+'&sortDir='+${sortDir}}">[[${i}]]</a>
+				</li>
+
+				<li th:class="${currentPage==totalPages?'page-item disabled':'page-item'}"><a class="page-link" th:href="@{'/users/page/'+${currentPage+1}+'?sortField='+${sortField}+'&sortDir='+${sortDir}}">Next</a></li>
+				<li th:class="${currentPage==totalPages?'page-item disabled':'page-item'}"><a class="page-link" th:href="@{'/users/page/'+${totalPages}+'?sortField='+${sortField}+'&sortDir='+${sortDir}}">Last</a></li>
+			</ul>
+		</nav>
+	</div>
+
+	<div th:replace="fragments/common.html :: modalDialog(~{::h5},~{::#modalBody},~{::.btn})" >
 		<h5 class="modal-title" id="modalTitle">Are you sure?</h5>
 		<span id="modalBody">Are you sure you want to delete this user?</span>
 		<a type="button" class="btn btn-success" id="confirmModal">Yes</a>
 		<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
 	</div>
-	
-	<div th:replace="common.html :: footer"></div>
+
+	<div th:replace="fragments/common.html :: footer"></div>
 </div>
 
 <script type="text/javascript">
@@ -70,6 +113,10 @@
 			$("#modalDialog").modal('show');
 		});
 	});
+
+	function clearFilter(){
+		window.location="[[@{/users}]]"
+	}
 </script>
 </body>
 </html>

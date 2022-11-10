@@ -8,14 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.SQLOutput;
 
 public class FileUploadUtil {
 
     public static void saveFile(String uploadDir, String fileName, MultipartFile multipartFile) throws IOException {
         Path uploadPath = Paths.get(uploadDir);
-
         if(!Files.exists(uploadPath)){
-            Files.createDirectory(uploadPath);
+            Path newPath = Files.createDirectory(uploadPath);
+            System.out.println(newPath);
         }
 
         try(InputStream inputStream = multipartFile.getInputStream()){
@@ -23,6 +24,23 @@ public class FileUploadUtil {
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
         }catch (IOException ex){
             throw new IOException("Could not save file: "+fileName, ex);
+        }
+    }
+
+    public static void clean(String dir) {
+        Path dirPath = Paths.get(dir);
+        try{
+            Files.list(dirPath).forEach(f->{
+                if(!Files.isDirectory(f)) {
+                    try{
+                        Files.delete(f);
+                    }catch (IOException e){
+                        System.out.println("could not delete file: "+f);
+                    }
+                }
+            });
+        }catch (IOException ee){
+            System.out.println("Could not list directory "+dir);
         }
     }
 }

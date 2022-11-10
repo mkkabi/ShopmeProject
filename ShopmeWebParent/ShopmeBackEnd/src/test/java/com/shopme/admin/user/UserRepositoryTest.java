@@ -2,6 +2,7 @@ package com.shopme.admin.user;
 
 import com.shopme.common.entity.Role;
 import com.shopme.common.entity.User;
+import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -11,12 +12,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -118,7 +123,7 @@ public class UserRepositoryTest {
         String email = "abc@def.com";
         User user = userRepository.getUserByEmail(email);
         assertThat(user).isNull();
-        User user2 = userRepository.getUserByEmail("user1@gmail.com");
+        User user2 = userRepository.getUserByEmail("spencer@grr.la");
         assertThat(user2).isNotNull();
     }
 
@@ -139,5 +144,35 @@ public class UserRepositoryTest {
     public void testEnableUser(){
         Integer id = 30;
         userRepository.updateEnabledStatus(id, true);
+    }
+
+    @Test
+    public void testListFirstPage(){
+        int pageNumber = 0;
+        int pageSize = 4;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<User> page = userRepository.findAll(pageable);
+
+        List<User> userList = page.getContent();
+        userList.forEach(System.out::println);
+
+        assertThat(userList.size()).isEqualTo(4);
+    }
+    @Test
+    public void testSearchUser(){
+        String keyword = "bruce";
+        int pageNumber =0;
+        int pageSize =4;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<User> page = userRepository.findAll(keyword, pageable);
+        List<User> userList = page.getContent();
+
+        userList.forEach(u->{
+            StringBuffer sb = new StringBuffer();
+            sb.append(u.getFirstName()).append(u.getLastName()).append(u.getEmail());
+            assertThat(sb.toString().toLowerCase()).contains(keyword);
+        });
+        System.out.println("Users search from test: ===========");
+        userList.forEach(System.out::println);
     }
 }
